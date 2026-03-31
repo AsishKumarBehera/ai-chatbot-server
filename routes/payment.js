@@ -9,10 +9,10 @@ const razorpay = new Razorpay({
 });
 
 // 1. Create order
-router.post('/payment/create-order', async (req, res) => {
+router.post('/create-order', async (req, res) => {  // ← removed /payment
   try {
     const order = await razorpay.orders.create({
-      amount: 49900,           // ₹499 in paise
+      amount: 49900,
       currency: 'INR',
       receipt: `receipt_${Date.now()}`,
     });
@@ -20,7 +20,7 @@ router.post('/payment/create-order', async (req, res) => {
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
-      keyId: process.env.RAZORPAY_KEY_ID, // send key safely from backend
+      keyId: process.env.RAZORPAY_KEY_ID,
     });
   } catch (err) {
     res.status(500).json({ error: 'Order creation failed' });
@@ -28,7 +28,7 @@ router.post('/payment/create-order', async (req, res) => {
 });
 
 // 2. Verify payment
-router.post('/payment/verify-payment', async (req, res) => {
+router.post('/verify-payment', async (req, res) => {  // ← removed /payment
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
   const expectedSig = crypto
@@ -40,14 +40,11 @@ router.post('/payment/verify-payment', async (req, res) => {
     return res.status(400).json({ error: 'Payment verification failed' });
   }
 
-  // TODO: update your DB here — set user plan to 'pro'
-  // await User.findByIdAndUpdate(req.user.id, { plan: 'pro' });
-
   res.json({ success: true });
 });
 
-// 3. Webhook (reliable fallback)
-router.post('/payment/webhook', (req, res) => {
+// 3. Webhook
+router.post('/webhook', (req, res) => {  // ← removed /payment
   const sig = req.headers['x-razorpay-signature'];
   const expectedSig = crypto
     .createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET)
@@ -58,7 +55,6 @@ router.post('/payment/webhook', (req, res) => {
 
   const event = JSON.parse(req.body);
   if (event.event === 'payment.captured') {
-    // Safely upgrade user from server side
     console.log('Payment captured:', event.payload.payment.entity.id);
   }
 

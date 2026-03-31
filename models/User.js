@@ -13,7 +13,14 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
-    }
+    },
+
+    // backend/models/User.js
+plan: {
+  type: String,
+  enum: ['free', 'pro'],
+  default: 'free'
+}
 })
 
 // Create the Model

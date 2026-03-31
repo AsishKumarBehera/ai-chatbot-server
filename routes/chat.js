@@ -59,4 +59,17 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   }
 })
 
+
+// backend/routes/user.js (or wherever your user routes are)
+router.get('/plan', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('plan')
+    res.json({ plan: user.plan || 'free' })
+  } catch (err) {
+    res.status(500).json({ error: 'Could not fetch plan' })
+  }
+})
+
+
+
 module.exports = router
